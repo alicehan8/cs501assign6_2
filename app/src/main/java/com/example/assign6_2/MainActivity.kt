@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -66,19 +67,25 @@ fun CompassLevelScreen(helper: SensorHelper) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .background(Color.Blue),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
 
         Text(
-            "Adventure Compass",
+            "Compass",
             fontSize = 28.sp
         )
 
         Compass(heading = heading)
 
-        DigitalLevel(pitch = pitch, roll = roll)
+        Text(
+            "Level",
+            fontSize = 28.sp
+        )
+
+        Level(pitch = pitch, roll = roll)
     }
 }
 
@@ -94,11 +101,10 @@ fun Compass(heading: Float) {
         modifier = Modifier
             .size(260.dp)
             .background(Color(0xFF1F2A38), shape = CircleShape)
-            .border(4.dp, Color.White, CircleShape)
+            .border(4.dp, Color.LightGray, CircleShape)
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Needle
         Canvas(modifier = Modifier.fillMaxSize()) {
             rotate(-animatedHeading) {
                 drawLine(
@@ -121,31 +127,28 @@ fun Compass(heading: Float) {
 }
 
 @Composable
-fun DigitalLevel(pitch: Float, roll: Float) {
+fun Level(pitch: Float, roll: Float) {
 
-    val bubbleX = (roll * 20).coerceIn(-80f, 80f)
-    val bubbleY = (pitch * 20).coerceIn(-80f, 80f)
+    val size = 200.dp
+    val bubbleSize = 40.dp
+
+    val density = LocalDensity.current
+    val maxOffsetPx = with(density) { ((size - bubbleSize) / 2).toPx() }
+
+    val bubbleX = ((pitch / 90f) * maxOffsetPx).coerceIn(-maxOffsetPx, maxOffsetPx) + 200
+    val bubbleY = ((roll / 180f) * maxOffsetPx).coerceIn(-maxOffsetPx, maxOffsetPx) + 100
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            "Digital Level",
-            color = Color.White,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
         Box(
             modifier = Modifier
-                .size(200.dp)
+                .size(size)
                 .background(Color(0xFF1F2A38), shape = CircleShape)
                 .border(3.dp, Color.White, CircleShape)
         ) {
-
             Box(
                 modifier = Modifier
                     .offset { IntOffset(bubbleX.toInt(), bubbleY.toInt()) }
-                    .size(40.dp)
+                    .size(bubbleSize)
                     .background(Color(0xFF00E6B8), shape = CircleShape)
             )
         }
@@ -153,8 +156,7 @@ fun DigitalLevel(pitch: Float, roll: Float) {
         Spacer(Modifier.height(12.dp))
 
         Text(
-            "Pitch: ${"%.2f".format(pitch)}°   Roll: ${"%.2f".format(roll)}°",
-            color = Color.White,
+            "Pitch: ${"%.1f".format(pitch)}°   Roll: ${"%.1f".format(roll)}°",
             fontSize = 18.sp
         )
     }
@@ -162,19 +164,3 @@ fun DigitalLevel(pitch: Float, roll: Float) {
 
 
 
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Assign6_2Theme {
-        Greeting("Android")
-    }
-}
